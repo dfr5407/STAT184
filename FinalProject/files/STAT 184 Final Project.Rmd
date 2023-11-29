@@ -1,6 +1,7 @@
 ---
 title: "Final Project"
 output: html_notebook
+author: 'Daniel Radunsky, Urvish Patel, Dominic Felice'
 ---
 
 **Data Access**

@@ -18,7 +18,7 @@ library(mosaic)
 
 First Dataset
 ```{r}
-NBA_Data <- read.csv("https://raw.githubusercontent.com/dfr5407/stat184/main/datasets/all_seasons.csv")
+NBA_Data <- read.csv("https://raw.githubusercontent.com/dfr5407/STAT184/main/FinalProject/datasets/all_seasons.csv")
 
 NBA_Data <- NBA_Data %>%
   rename(points = 'pts', rebounds = 'reb', assists = 'ast', name = player_name, team = team_abbreviation, height = player_height, weight = player_weight)%>%
@@ -31,7 +31,7 @@ head(NBA_Data)
 
 Second Dataset
 ```{r}
-TeamNBA_Data <- read.csv("https://raw.githubusercontent.com/dfr5407/stat184/main/datasets/NBA_Team_Stats.csv")
+TeamNBA_Data <- read.csv("https://raw.githubusercontent.com/dfr5407/STAT184/main/FinalProject/datasets/NBA_Team_Stats.csv")
 
 TeamNBA_Data <- TeamNBA_Data %>%
   rename(points = 'PTS', rebounds = 'REB', assists = 'AST', season = 'SEASON', team = 'TEAM')%>%

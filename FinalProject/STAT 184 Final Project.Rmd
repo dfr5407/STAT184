@@ -1,0 +1,97 @@
+---
+title: "Final Project"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+library(tidyverse)
+library(DataComputing)
+library(ggplot2)
+library(readr)
+library(stringr)
+library(mosaic)
+```
+
+
+**First Dataset**
+```{r}
+NBA_Data <- read.csv("https://raw.githubusercontent.com/dfr5407/stat184/main/datasets/all_seasons.csv")
+
+NBA_Data <- NBA_Data %>%
+  rename(points = 'pts', rebounds = 'reb', assists = 'ast', name = player_name, team = team_abbreviation, height = player_height, weight = player_weight)%>%
+  mutate(season = substr(season, 1, 4))
+
+head(NBA_Data)
+
+```
+
+
+**Second Dataset**
+```{r}
+TeamNBA_Data <- read.csv("https://raw.githubusercontent.com/dfr5407/stat184/main/datasets/NBA_Team_Stats.csv")
+
+TeamNBA_Data <- TeamNBA_Data %>%
+  rename(points = 'PTS', rebounds = 'REB', assists = 'AST', season = 'SEASON', team = 'TEAM')%>%
+  mutate(season = substr(season, 1, 4))
+
+team_mapping <- data.frame(
+  team_name = c(
+    "Atlanta Hawks", "Boston Celtics", "Brooklyn Nets", "Charlotte Hornets", 
+    "Chicago Bulls", "Cleveland Cavaliers", "Dallas Mavericks", "Denver Nuggets",
+    "Detroit Pistons", "Golden State Warriors", "Houston Rockets", "Indiana Pacers",
+    "LA Clippers", "Los Angeles Lakers", "Memphis Grizzlies", "Miami Heat",
+    "Milwaukee Bucks", "Minnesota Timberwolves", "New Orleans Pelicans", 
+    "New York Knicks", "Oklahoma City Thunder", "Orlando Magic", "Philadelphia 76ers",
+    "Phoenix Suns", "Portland Trail Blazers", "Sacramento Kings", "San Antonio Spurs",
+    "Toronto Raptors", "Utah Jazz", "Washington Wizards"
+  ),
+  team_abbreviation = c(
+    "ATL", "BOS", "BKN", "CHA", "CHI", "CLE", "DAL", "DEN", "DET", "GSW", "HOU", "IND",
+    "LAC", "LAL", "MEM", "MIA", "MIL", "MIN", "NOP", "NYK", "OKC", "ORL", "PHI", "PHX",
+    "POR", "SAC", "SAS", "TOR", "UTA", "WAS"
+  )
+)
+
+TeamNBA_Data <- TeamNBA_Data %>%
+  mutate(team = ifelse(team %in% team_mapping$team_name, team_mapping$team_abbreviation[match(team, team_mapping$team_name)], team))
+
+head(TeamNBA_Data)
+
+```
+
+
+**Yearly Data (Data Verbs)**
+```{r}
+YearlyNBA_Data <- NBA_Data %>%
+  group_by(season, points, assists, rebounds, net_rating)%>%
+  summarise()%>%
+  arrange(desc(points))
+
+YearlyNBA_Data
+```
+
+Groups mean data by season.
+```{r}
+MeanYearlyData <- YearlyNBA_Data%>%
+  group_by(season)%>%
+  summarise(mean_points = mean(points), mean_assists = mean(assists), mean_rebounds = mean(rebounds))%>%
+  arrange(desc(mean_points))
+
+(MeanYearlyData)
+```
+
+Groups mean data by team and respective season.
+```{r}
+TeamSeason <- NBA_Data%>%
+  group_by(team, season)%>%
+  summarise(mean_points = mean(points), mean_assists = mean(assists), mean_rebounds = mean(rebounds))%>%
+  arrange(season)
+
+TeamSeason
+
+```
+

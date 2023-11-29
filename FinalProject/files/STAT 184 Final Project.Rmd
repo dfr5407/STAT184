@@ -96,3 +96,29 @@ TeamSeason
 
 ```
 
+Regular Expressions (RegEx) 
+```{r}
+NBA_Abbreviations_Ending_In_A <- str_ends(TeamNBA_Data$team, "A")
+print(TeamNBA_Data[NBA_Abbreviations_Ending_In_A, ])
+```
+
+
+Reduction/Transformation Function
+```{r}
+MergedTable <- TeamNBA_Data %>%
+  inner_join(NBA_Data, by = c("team" = "team"))
+
+print(MergedTable)
+
+```
+
+Pivot Wider/Longer
+```{r}
+WideNBA <- TeamSeason %>%
+  select(team, season, mean_points)%>%
+ pivot_wider(names_from = season, values_from = mean_points)
+
+head(WideNBA)
+  
+  
+```

@@ -3,9 +3,7 @@ title: "Final Project"
 output: html_notebook
 ---
 
-This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
-
-Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+**Data Access**
 
 ```{r}
 library(tidyverse)
@@ -63,8 +61,10 @@ head(TeamNBA_Data)
 
 ```
 
+**Data Wrangling**
 
-**Yearly Data (Data Verbs)**
+
+Yearly Data (Data Verbs)
 ```{r}
 YearlyNBA_Data <- NBA_Data %>%
   group_by(season, points, assists, rebounds, net_rating)%>%

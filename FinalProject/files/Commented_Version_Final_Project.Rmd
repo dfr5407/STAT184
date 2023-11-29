@@ -1,0 +1,204 @@
+---
+title: "Final Project"
+output: html_notebook
+author: 'Daniel Radunsky, Urvish Patel, Dominic Felice'
+---
+**Research Question**
+How do the average points scored by NBA teams change across numerous seasons along with how the players have contributed to that?
+
+**Introduction**
+In our project we aim to understand NBA team scoring over the years, we're putting the spotlight on both the big-picture trends and the combined efforts of players. How do the average points scored by NBA teams change across the seasons, and how do players, working together as a team, shape these shifts? How player scoring affects the overall team scoring is a interesting concept. There a numerous answers to that question and hopefully by the end of the project we have evidence through our data to answer it. 
+
+**Data Access**
+
+```{r}
+library(tidyverse)
+library(DataComputing)
+library(ggplot2)
+library(readr)
+library(stringr)
+library(mosaic)
+```
+
+The code performs data preprocessing on NBA player statistics, including renaming columns and extracting the year from the "season" column. The head function is then used to preview the resulting modified data frame.
+
+
+First Dataset
+```{r}
+# Read the NBA data from the given URL
+NBA_Data <- read.csv("https://raw.githubusercontent.com/dfr5407/STAT184/main/FinalProject/datasets/all_seasons.csv")
+
+# Rename selected columns and extract the year from the "season" column
+NBA_Data <- NBA_Data %>%
+  rename(
+    points = 'pts',
+    rebounds = 'reb',
+    assists = 'ast',
+    name = player_name,
+    team = team_abbreviation,
+    height = player_height,
+    weight = player_weight
+  ) %>%
+  mutate(season = substr(season, 1, 4))
+
+# Display the first few rows of the modified NBA_Data data frame
+head(NBA_Data)
+
+```
+The second dataset, sourced from Kaggle, posed a challenge as it presented team names in full, while our initial dataset featured abbreviated names. To address the problem and facilitate a seamless join operation based on team names, we opted to transform all full team names into their corresponding abbreviations. The provided R code addresses the task by leveraging the team_mapping data frame, which pairs NBA team names with their respective abbreviations. The mutate function is then employed on the TeamNBA_Data data frame, utilizing the ifelse condition to substitute full team names with abbreviations where matches are found in the team_mapping dataset. The %in% operator identifies matches, and the match function retrieves the corresponding abbreviation for each team name. Consequently, the "team" column in the second dataset now reflects the desired abbreviations, aligning with the format of the first dataset for streamlined data integration.
+
+Second Dataset
+```{r}
+# Read the TeamNBA_Data from the given URL
+TeamNBA_Data <- read.csv("https://raw.githubusercontent.com/dfr5407/STAT184/main/FinalProject/datasets/NBA_Team_Stats.csv")
+
+# Rename selected columns and extract the year from the "SEASON" column
+TeamNBA_Data <- TeamNBA_Data %>%
+  rename(
+    points = 'PTS',
+    rebounds = 'REB',
+    assists = 'AST',
+    season = 'SEASON',
+    team = 'TEAM'
+  ) %>%
+  mutate(season = substr(season, 1, 4))
+
+# Create a data frame team_mapping with NBA team names and abbreviations
+team_mapping <- data.frame(
+  team_name = c(
+    "Atlanta Hawks", "Boston Celtics", "Brooklyn Nets", "Charlotte Hornets", 
+    "Chicago Bulls", "Cleveland Cavaliers", "Dallas Mavericks", "Denver Nuggets",
+    "Detroit Pistons", "Golden State Warriors", "Houston Rockets", "Indiana Pacers",
+    "LA Clippers", "Los Angeles Lakers", "Memphis Grizzlies", "Miami Heat",
+    "Milwaukee Bucks", "Minnesota Timberwolves", "New Orleans Pelicans", 
+    "New York Knicks", "Oklahoma City Thunder", "Orlando Magic", "Philadelphia 76ers",
+    "Phoenix Suns", "Portland Trail Blazers", "Sacramento Kings", "San Antonio Spurs",
+    "Toronto Raptors", "Utah Jazz", "Washington Wizards"
+  ),
+  team_abbreviation = c(
+    "ATL", "BOS", "BKN", "CHA", "CHI", "CLE", "DAL", "DEN", "DET", "GSW", "HOU", "IND",
+    "LAC", "LAL", "MEM", "MIA", "MIL", "MIN", "NOP", "NYK", "OKC", "ORL", "PHI", "PHX",
+    "POR", "SAC", "SAS", "TOR", "UTA", "WAS"
+  )
+)
+
+# Modify the "team" column based on the team_mapping data frame
+TeamNBA_Data <- TeamNBA_Data %>%
+  mutate(
+    team = ifelse(
+      team %in% team_mapping$team_name, 
+      team_mapping$team_abbreviation[match(team, team_mapping$team_name)], 
+      team
+    )
+  )
+
+# Display the first few rows of the modified TeamNBA_Data data frame
+head(TeamNBA_Data)
+```
+
+**Data Wrangling**
+
+The code takes the NBA_Data data frame, groups it season, points, assists, rebounds, and net_rating while retaining the original columns without aggregation, and then arranges the resulting data frame in descending order based on the "points" column. The result is stored in a new data frame called YearlyNBA_Data.
+
+
+Yearly Data (Data Verbs)
+```{r}
+# Created a new data frame YearlyNBA_Data by grouping NBA_Data by specific columns
+YearlyNBA_Data <- NBA_Data %>%
+  # Group the data by season, points, assists, rebounds, and net_rating
+  group_by(season, points, assists, rebounds, net_rating)%>%
+  # Summarize the data within each group; however, it's empty here, so it retains the original  columns
+  summarise()%>%
+  # Arrange the resulting data frame in descending order based on the points column
+  arrange(desc(points))
+
+YearlyNBA_Data
+```
+The code takes the previously created YearlyNBA_Data data frame, further groups it by the "season" column, and calculates the mean values for "points," "assists," and "rebounds" within each season. The results are stored in a new data frame called MeanYearlyData. The final data frame is then arranged in descending order based on the mean points column. The result is a summary data frame that provides the mean values for key statistical categories (points, assists, rebounds) for each NBA season, ordered by the mean points in descending order.
+
+
+Groups mean data by season.
+```{r}
+# Create a new data frame MeanYearlyData by grouping YearlyNBA_Data by season
+MeanYearlyData <- YearlyNBA_Data %>%
+  
+  # Group the data by season
+  group_by(season) %>%
+  
+  # Calculate mean values for points, assists, and rebounds within each season
+  summarise(
+    mean_points = mean(points),
+    mean_assists = mean(assists),
+    mean_rebounds = mean(rebounds)
+  ) %>%
+  
+  # Arrange the resulting data frame in descending order based on the mean points column
+  arrange(desc(mean_points))
+
+MeanYearlyData
+```
+The code takes the original NBA_Data data frame and groups it by both the "team" and "season" columns. For each combination of team and season, it calculates the mean values for "points," "assists," and "rebounds." The results are stored in a new data frame called TeamSeason. The final data frame is arranged in ascending order based on the "season" column. The resulting TeamSeason data frame provides the mean values for key statistical categories (points, assists, rebounds) for each NBA team in each season, organized by season.
+
+
+Groups mean data by team and respective season.
+```{r}
+# Create a new data frame TeamSeason by grouping NBA_Data by team and season
+TeamSeason <- NBA_Data %>%
+  
+  # Group the data by both team and season
+  group_by(team, season) %>%
+  
+  # Calculate mean values for points, assists, and rebounds within each team and season
+  summarise(
+    mean_points = mean(points),
+    mean_assists = mean(assists),
+    mean_rebounds = mean(rebounds)
+  ) %>%
+  
+  # Arrange the resulting data frame in ascending order based on the season column
+  arrange(season)
+
+print(TeamSeason)
+
+```
+The code identifies and prints the rows of the TeamNBA_Data data frame where the team names conclude with the letter "A."
+
+Regular Expressions (RegEx) 
+```{r}
+# Create a logical vector NBA_Abbreviations_Ending_In_A using str_ends
+NBA_Abbreviations_Ending_In_A <- str_ends(TeamNBA_Data$team, "A")
+
+# Print rows in TeamNBA_Data where the team names end with "A"
+print(TeamNBA_Data[NBA_Abbreviations_Ending_In_A, ])
+
+```
+The code merges the two data frames based on the "team" column, creating a new data frame MergedTable, and then prints the merged result.
+
+Reduction/Transformation Function
+```{r}
+# Merge TeamNBA_Data and NBA_Data data frames based on the "team" column
+MergedTable <- TeamNBA_Data %>%
+  inner_join(NBA_Data, by = c("team" = "team"))
+
+print(MergedTable)
+
+```
+The code transforms the long-format TeamSeason data frame into a wide-format data frame, WideNBA, where each season's mean points for each team is in a separate column. The head function then shows the initial rows of the wide-format data frame.
+
+
+Pivot Wider/Longer
+```{r}
+# Create a wide-format data frame WideNBA from the TeamSeason data frame
+WideNBA <- TeamSeason %>%
+  
+  # Select specific columns: team, season, and mean_points
+  select(team, season, mean_points) %>%
+  
+  # Reshape the data to wide format using pivot_wider
+  pivot_wider(names_from = season, values_from = mean_points)
+
+# Display the first few rows of the WideNBA data frame
+head(WideNBA)
+  
+  
+```

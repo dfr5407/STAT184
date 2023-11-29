@@ -15,7 +15,7 @@ library(mosaic)
 ```
 
 
-**First Dataset**
+First Dataset
 ```{r}
 NBA_Data <- read.csv("https://raw.githubusercontent.com/dfr5407/stat184/main/datasets/all_seasons.csv")
 
@@ -28,7 +28,7 @@ head(NBA_Data)
 ```
 
 
-**Second Dataset**
+Second Dataset
 ```{r}
 TeamNBA_Data <- read.csv("https://raw.githubusercontent.com/dfr5407/stat184/main/datasets/NBA_Team_Stats.csv")
 

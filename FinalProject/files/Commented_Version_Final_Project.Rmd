@@ -45,6 +45,7 @@ NBA_Data <- NBA_Data %>%
 head(NBA_Data)
 
 ```
+
 The second dataset, sourced from Kaggle, posed a challenge as it presented team names in full, while our initial dataset featured abbreviated names. To address the problem and facilitate a seamless join operation based on team names, we opted to transform all full team names into their corresponding abbreviations. The provided R code addresses the task by leveraging the team_mapping data frame, which pairs NBA team names with their respective abbreviations. The mutate function is then employed on the TeamNBA_Data data frame, utilizing the ifelse condition to substitute full team names with abbreviations where matches are found in the team_mapping dataset. The %in% operator identifies matches, and the match function retrieves the corresponding abbreviation for each team name. Consequently, the "team" column in the second dataset now reflects the desired abbreviations, aligning with the format of the first dataset for streamlined data integration.
 
 Second Dataset
@@ -96,6 +97,26 @@ TeamNBA_Data <- TeamNBA_Data %>%
 head(TeamNBA_Data)
 ```
 
+In the scatter plots below, we explore the amount of points and wins that teams get by different seasons. We can do this using the TeamNBA_Draft data frame that was created above.
+```{r}
+TeamNBA_Data %>%
+  #Filter out the teams we did not format in the previous code and include just a few seasons
+  filter(!team %in% c("Charlotte Bobcats", "Los Angeles Clippers", "New Jersey Nets",
+                     "New Orleans Hornets", "New Orleans/Oklahoma City Hornets",
+                     "Seattle SuperSonics", "Vancouver Grizzlies")) %>%
+  filter(season %in% c(2000, 2005, 2010, 2015, 2020)) %>%
+  #On the x-axis we're putting the amount of wins, on the y-axis will be points, and different teams will be     different colors
+  ggplot(aes(x = W, y = points, color = team)) +
+  geom_point() +
+  labs(title = "Scatterplot of Wins vs Points by Team and Season",
+       x = "Wins",
+       y = "Points") +
+  theme_minimal() +
+  theme(legend.position = "right") +
+  #Display the different included seasons
+  facet_wrap(~season, scales = "free")
+```
+
 **Data Wrangling**
 
 The code takes the NBA_Data data frame, groups it season, points, assists, rebounds, and net_rating while retaining the original columns without aggregation, and then arranges the resulting data frame in descending order based on the "points" column. The result is stored in a new data frame called YearlyNBA_Data.
@@ -114,6 +135,21 @@ YearlyNBA_Data <- NBA_Data %>%
 
 YearlyNBA_Data
 ```
+
+Using the dataset made above, we can create a boxplot that takes a look at the mean value of points by season. 
+```{r}
+YearlyNBA_Data %>%
+  filter(season %in% c(2000, 2005, 2010, 2015, 2020)) %>%
+  ggplot(aes(x = season, y = points, color = season)) +
+  geom_boxplot() +
+  labs(title = "Boxplot of Points by Season",
+       x = "Season",
+       y = "Points",
+       color = "Season") +
+  theme_minimal()
+```
+Looking at the dataframe, we can see that from the seasons above the points averaged will be right around 7 to 9 points a season.
+
 The code takes the previously created YearlyNBA_Data data frame, further groups it by the "season" column, and calculates the mean values for "points," "assists," and "rebounds" within each season. The results are stored in a new data frame called MeanYearlyData. The final data frame is then arranged in descending order based on the mean points column. The result is a summary data frame that provides the mean values for key statistical categories (points, assists, rebounds) for each NBA season, ordered by the mean points in descending order.
 
 
@@ -183,6 +219,23 @@ MergedTable <- TeamNBA_Data %>%
 print(MergedTable)
 
 ```
+
+The below graph uses the joined data frame made above and displays total team points throughout seasons. The teams included are four of the most popular; The Los Angeles Lakers, Miami Heat, Golden State Warriors, and Chicago Bulls. The histogram displays the total points the team earned in a season, and the bars are filled in by the individual player points earned in that season. The lighter the player color the more points that player earned for the team in a season.
+```{r}
+MergedTable %>%
+  filter(team %in% c("LAL", "MIA", "GSW", "CHI")) %>%
+  filter(season.x %in% c(2000, 2005, 2010, 2015, 2020)) %>%
+  ggplot(aes(x = season.x, y = points.x, fill = points.y)) +
+  geom_histogram(stat = "identity", position = "stack", bins = 20) +
+  labs(title = "Histogram of Team Points by Season and Team",
+       x = "Season",
+       y = "Team Points",
+       fill = "Player Points") +
+  facet_wrap(~team) +
+  scale_fill_viridis_c() +
+  theme_minimal()
+```
+
 The code transforms the long-format TeamSeason data frame into a wide-format data frame, WideNBA, where each season's mean points for each team is in a separate column. The head function then shows the initial rows of the wide-format data frame.
 
 
